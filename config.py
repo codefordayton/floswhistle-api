@@ -14,4 +14,4 @@ class ProdConfig(Config):
     DEBUG = False
 
     if 'RDS_HOSTNAME' in os.environ:
-        SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ['RDS_USERNAME']}:{os.environ['RDS_PASSWORD']}@{os.environ['RDS_HOSTNAME']}/{os.environ['RDS_DB_NAME']}"
+        SQLALCHEMY_DATABASE_URI = f"postgres://{os.environ['RDS_USERNAME']}:{os.environ['RDS_PASSWORD']}@{os.environ['RDS_HOSTNAME']}/{os.environ['RDS_DB_NAME']}"
