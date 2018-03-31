@@ -6,6 +6,7 @@ class Config(object):
     SERVER_PORT = 6000
     SECRET_KEY = 'secret key'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///data/test.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class ProdConfig(Config):

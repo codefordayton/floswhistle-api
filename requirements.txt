@@ -1,5 +1,7 @@
 alembic==0.9.9
+awsebcli==3.12.4
 blessed==1.14.2
+botocore==1.9.21
 cement==2.8.2
 certifi==2018.1.18
 chardet==3.0.4
@@ -13,6 +15,7 @@ Flask-Cors==3.0.3
 Flask-Migrate==2.1.1
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.3.2
+gunicorn==19.7.1
 idna==2.6
 itsdangerous==0.24
 Jinja2==2.10
