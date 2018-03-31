@@ -1,7 +1,6 @@
 __pycache__
 env
 *.swp
-config.py
 *.db
 
 # Elastic Beanstalk Files
