@@ -1,11 +1,12 @@
 import hashlib
 from datetime import datetime, timedelta
+from dateutil import parser
 import random
 import requests
 from enum import Enum
 from flask import Flask, Blueprint, request, Response, json
 from extensions import cors, db, migrate
-from controllers.database.whistle import Whistle
+from controllers.database.whistle import Whistle, Shift
 from controllers.database.zip import Zip
 
 try:
@@ -42,6 +43,14 @@ def is_valid(data):
     if not zip:
         valid = False
     
+    # Is the date to be reported in the last two?
+    report_date = data.get('report_date')
+    if report_date:
+        time_window = datetime.utcnow() - timedelta(days=2)
+        reported_date = parser.parse(report_date)
+        if reported_date < time_window:
+            valid = False
+
     return valid
 
 def generate_hash(request):
@@ -50,12 +59,27 @@ def generate_hash(request):
     input = ip + ' ' + user_string
     return hashlib.md5(input.encode()).hexdigest()
 
-def is_unique(hash):
+def is_unique(hash, report_date, shift):
     time_window = datetime.utcnow() - timedelta(hours=12)
+    if report_date:
+        reported_date = parser.parse(report_date).date()
+    else:
+        reported_date = datetime.utcnow().date()  
+
+    if not shift:
+        shift = Shift.day
+
+    print("HERE", report_date, reported_date, shift)
     existing = Whistle.query.filter(
         Whistle.hash == hash,
-        Whistle.created_date > time_window).limit(1).one_or_none()
-    return existing is None
+        Whistle.created_date > time_window,
+        # Whistle.report_date == reported_date,
+        Whistle.shift == shift).all() #.limit(1).one_or_none()
+    for rec in existing:
+        print('REC', reported_date == rec.report_date, reported_date, rec.report_date, rec.shift)
+    print('REC', existing)
+    # return existing is None
+    return len(existing) == 0
 
 def get_zip_district(zip):
     zips = Zip.query.filter(Zip.zip == zip).all()
@@ -73,7 +97,7 @@ def create_whistle():
 
     # check that we haven't seen this user in 12 hours
     user_hash = generate_hash(request)
-    if not is_unique(user_hash):
+    if not is_unique(user_hash, request.json.get('report_date'), request.json.get('shift')):
         return Response(json.dumps({'error': 'Too many requests'}),
                         mimetype='application/json', status=400)
 

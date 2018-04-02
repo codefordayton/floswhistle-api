@@ -2,6 +2,7 @@ from extensions import db
 
 import uuid
 import datetime
+from dateutil import parser
 import enum
 
 class Shift(enum.Enum):
@@ -39,7 +40,9 @@ class Whistle(db.Model):
                  reporter_type=ReporterType.lpn, **kwargs):
         self.id = str(uuid.uuid4())
         if report_date is None:
-            self.report_date = datetime.datetime.utcnow().date()
+            self.report_date = datetime.datetime.now().date()
+        else:
+            self.report_date = parser.parse(report_date).date()
         self.hash = hash
         self.shift = shift
         self.facility_type = facility_type
