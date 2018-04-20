@@ -6,9 +6,15 @@ from flask_migrate import MigrateCommand
 from app import create_app
 
 import scripts.load_zips
+import scripts.demo_data
 
 app = create_app()
 manager = Manager(app)
+
+class DemoDataCommand(Command):
+
+    def run(self):
+        scripts.demo_data.load()
 
 class ServerCommand(Command):
 
@@ -32,5 +38,6 @@ class ZipLoaderCommand(Command):
 manager.add_command('db', MigrateCommand)
 manager.add_command('serve', ServerCommand())
 manager.add_command('zips', ZipLoaderCommand())
+manager.add_command('demo', DemoDataCommand())
 
 manager.run()

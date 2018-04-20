@@ -69,15 +69,11 @@ def is_unique(hash, report_date, shift):
     if not shift:
         shift = Shift.day
 
-    print("HERE", report_date, reported_date, shift)
     existing = Whistle.query.filter(
         Whistle.hash == hash,
         Whistle.created_date > time_window,
-        # Whistle.report_date == reported_date,
         Whistle.shift == shift).all() #.limit(1).one_or_none()
-    for rec in existing:
-        print('REC', reported_date == rec.report_date, reported_date, rec.report_date, rec.shift)
-    print('REC', existing)
+
     # return existing is None
     return len(existing) == 0
 
@@ -114,12 +110,69 @@ def create_whistle():
 @api_blueprint.route('/data', methods=['GET'])
 def get_data():
     resp = {}
-    time_window = datetime.utcnow() - timedelta(days=7)
-    whistles = Whistle.query.filter(
-        Whistle.report_date > time_window).all()
-    whistle_objs = []
-    for item in whistles:
-        whistle_objs.append(item.as_simple_dict())
+    # TODO: This is gross.
+    rows = db.engine.execute("""
+        select
+            district_state,
+            district,
+            (select count(*) from whistles where district_state = w.district_state and 
+                                                 district = w.district) as total_count,
+            (select count(*) from whistles where reporter_type='lpn' and 
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as lpn_count,
+            (select count(*) from whistles where reporter_type='rn' and 
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as rn_count,
+            (select count(*) from whistles where reporter_type='cna' and 
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as cna_count,
+            (select count(*) from whistles where reporter_type='other' and 
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as other_count,
+            (select count(*) from whistles where shift = 'day' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as day_count,
+            (select count(*) from whistles where shift = 'night' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as night_count,
+            (select count(*) from whistles where shift = 'mid' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as mid_count,
+            (select count(*) from whistles where facility_type = 'hospital' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as hospital_count,
+            (select count(*) from whistles where facility_type = 'extended_care' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as extended_count,
+            (select count(*) from whistles where facility_type = 'long_term_care' and
+                                                 district_state = w.district_state and 
+                                                 district = w.district) as long_count
+        from whistles w
+        group by district_state, district;
+    """)
+    # whistle_objs = { 'start_date': '4/1/2018', 'end_date': '4/2/2018', 'states': {} }
+    whistle_objs = { 'states': {} }
+    for row in rows:
+        if row['district_state'] not in whistle_objs['states']:
+            whistle_objs['states'][row['district_state']] = {}
+        whistle_objs['states'][row['district_state']]["%02d" % row['district']] = {
+            'type': { 'total': row['total_count'],
+                'lpn': row['lpn_count'],
+                'rn': row['rn_count'],
+                'cna': row['cna_count'],
+                'other': row['other_count']
+            }, 'shift': {
+                'day': row['day_count'],
+                'night': row['night_count'],
+                'mid': row['mid_count']
+            }, 'facility_type': {
+                'hospital': row['hospital_count'],
+                'extended_care': row['extended_count'],
+                'long_term_care': row['long_count']
+            }
+        }
 
-    return Response(json.dumps(whistle_objs, cls=EnumEncoder),
-                    mimetype='application/json')
+    # for item in whistles:
+    #    whistle_objs.append(item.as_simple_dict())
+
+    return Response(json.dumps(whistle_objs), mimetype='application/json')
