@@ -29,7 +29,8 @@ def get_type():
     return types[random.randint(0, len(types) - 1)]
 
 def get_hash():
-    return str(uuid.uuid4())[:32]
+    print(str(uuid.uuid4())[:30])
+    return str(uuid.uuid4())[:30]
 
 def load():
 
