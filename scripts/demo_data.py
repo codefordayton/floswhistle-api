@@ -29,15 +29,14 @@ def get_type():
     return types[random.randint(0, len(types) - 1)]
 
 def get_hash():
-    return str(uuid.uuid4())
+    return str(uuid.uuid4())[:32]
 
 def load():
 
-    for x in range(1000):
+    for x in range(500):
         whistle = Whistle(hash=get_hash(), report_date=None,
                           shift=get_shift(), facility_type=get_facility_type(),
                           district_state=get_state(), district=get_district(),
                           reporter_type=get_type())
-        print(whistle)
         db.session.add(whistle)
         db.session.commit()
