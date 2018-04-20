@@ -18,6 +18,9 @@ depends_on = None
 
 def upgrade():
     op.drop_table('whistles')
+    op.execute("DROP TYPE shift;")
+    op.execute("DROP TYPE facilitytype;")
+    op.execute("DROP TYPE reporter_type;")
     op.create_table('whistles',
     sa.Column('id', sa.String(length=64), nullable=False),
     sa.Column('hash', sa.String(length=33), nullable=False),
