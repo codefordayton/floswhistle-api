@@ -1,14 +1,10 @@
 from extensions import db
+from sqlalchemy.sql import func
 
 import uuid
 import datetime
 from dateutil import parser
 import enum
-
-class Shift(enum.Enum):
-    day = 'day'
-    night = 'night'
-    mid = 'mid'
 
 class FacilityType(enum.Enum):
     hospital = 'hospital'
@@ -26,25 +22,29 @@ class Whistle(db.Model):
 
     id = db.Column(db.String(64), primary_key=True)
     hash = db.Column(db.String(33), nullable=False)
-    report_date = db.Column(db.DateTime, nullable=False)
-    shift = db.Column(db.Enum(Shift), nullable=False)
     facility_type = db.Column(db.Enum(FacilityType), nullable=False)
     district_state = db.Column(db.String, nullable=False)
     district = db.Column(db.Integer, nullable=False)
     reporter_type = db.Column(db.Enum(ReporterType), nullable=False)
     created_date = db.Column(db.DateTime, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, hash=None, report_date=None, shift=Shift.day,
+    def __init__(self, hash=None, report_date=None,
                  facility_type=FacilityType.hospital,
                  district_state=None, district=None,
+                 start_date=None, end_date=None,
                  reporter_type=ReporterType.lpn, **kwargs):
         self.id = str(uuid.uuid4())
-        if report_date is None:
-            self.report_date = datetime.datetime.now().date()
+        if start_date is None:
+            self.start_date = datetime.datetime.now()
         else:
-            self.report_date = parser.parse(report_date).date()
+            self.start_date = parser.parse(start_date)
+        if end_date is None:
+            self.end_date = datetime.datetime.now()
+        else:
+            self.end_date = parser.parse(end_date)
         self.hash = hash
-        self.shift = shift
         self.facility_type = facility_type
         self.district_state = district_state
         self.district = district
@@ -60,4 +60,3 @@ class Whistle(db.Model):
         data.pop('hash', None)
         data.pop('created_date', None)
         return data
-

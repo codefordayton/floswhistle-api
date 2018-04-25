@@ -35,8 +35,8 @@ def get_hash():
 def load():
 
     for x in range(500):
-        whistle = Whistle(hash=get_hash(), report_date=None,
-                          shift=get_shift(), facility_type=get_facility_type(),
+        whistle = Whistle(hash=get_hash(), start_date=None, end_date=None,
+                          facility_type=get_facility_type(),
                           district_state=get_state(), district=get_district(),
                           reporter_type=get_type())
         db.session.add(whistle)

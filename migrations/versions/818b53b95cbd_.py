@@ -25,12 +25,12 @@ def upgrade():
     sa.Column('id', sa.String(length=64), nullable=False),
     sa.Column('hash', sa.String(length=33), nullable=False),
     sa.Column('report_date', sa.DateTime(), nullable=False),
-    sa.Column('shift', sa.Enum('day', 'night', 'mid', name='shift'), nullable=False),
-    sa.Column('facility_type', sa.Enum('hospital', 'extended_care', 'long_term_care', name='facilitytype'), nullable=False),
+    sa.Column('shift', sa.Enum('day', 'night', 'mid', name='shift_type'), nullable=False),
+    sa.Column('facility_type', sa.Enum('hospital', 'extended_care', 'long_term_care', name='facilitytype2'), nullable=False),
     sa.Column('district_state', sa.String(), nullable=False),
     sa.Column('district', sa.Integer(), nullable=False),
     sa.Column('reporter_type', sa.String(), nullable=True),
-    sa.Column('reporter_type', sa.Enum('lpn', 'rn', 'cna', 'other', name='reporter_type'), nullable=False),
+    sa.Column('reporter_type', sa.Enum('lpn', 'rn', 'cna', 'other', name='reportertype'), nullable=False),
     sa.Column('created_date', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )

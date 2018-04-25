@@ -6,7 +6,7 @@ import requests
 from enum import Enum
 from flask import Flask, Blueprint, request, Response, json
 from extensions import cors, db, migrate
-from controllers.database.whistle import Whistle, Shift
+from controllers.database.whistle import Whistle
 from controllers.database.zip import Zip
 
 try:
@@ -44,11 +44,11 @@ def is_valid(data):
         valid = False
     
     # Is the date to be reported in the last two?
-    report_date = data.get('report_date')
-    if report_date:
+    start_date = data.get('start_date')
+    if start_date:
         time_window = datetime.utcnow() - timedelta(days=2)
-        reported_date = parser.parse(report_date)
-        if reported_date < time_window:
+        started_date = parser.parse(start_date)
+        if started_date < time_window:
             valid = False
 
     return valid
@@ -59,20 +59,16 @@ def generate_hash(request):
     input = ip + ' ' + user_string
     return hashlib.md5(input.encode()).hexdigest()
 
-def is_unique(hash, report_date, shift):
+def is_unique(hash, start_date):
     time_window = datetime.utcnow() - timedelta(hours=12)
-    if report_date:
-        reported_date = parser.parse(report_date).date()
+    if start_date:
+        started_date = parser.parse(start_date).date()
     else:
-        reported_date = datetime.utcnow().date()  
-
-    if not shift:
-        shift = Shift.day
+        started_date = datetime.utcnow().date()  
 
     existing = Whistle.query.filter(
         Whistle.hash == hash,
-        Whistle.created_date > time_window,
-        Whistle.shift == shift).all() #.limit(1).one_or_none()
+        Whistle.created_date > time_window).all()
 
     # return existing is None
     return len(existing) == 0
@@ -93,7 +89,7 @@ def create_whistle():
 
     # check that we haven't seen this user in 12 hours
     user_hash = generate_hash(request)
-    if not is_unique(user_hash, request.json.get('report_date'), request.json.get('shift')):
+    if not is_unique(user_hash, request.json.get('start_date')):
         return Response(json.dumps({'error': 'Too many requests'}),
                         mimetype='application/json', status=400)
 
@@ -129,15 +125,6 @@ def get_data():
             (select count(*) from whistles where reporter_type='other' and 
                                                  district_state = w.district_state and 
                                                  district = w.district) as other_count,
-            (select count(*) from whistles where shift = 'day' and
-                                                 district_state = w.district_state and 
-                                                 district = w.district) as day_count,
-            (select count(*) from whistles where shift = 'night' and
-                                                 district_state = w.district_state and 
-                                                 district = w.district) as night_count,
-            (select count(*) from whistles where shift = 'mid' and
-                                                 district_state = w.district_state and 
-                                                 district = w.district) as mid_count,
             (select count(*) from whistles where facility_type = 'hospital' and
                                                  district_state = w.district_state and 
                                                  district = w.district) as hospital_count,
@@ -161,18 +148,11 @@ def get_data():
                 'rn': row['rn_count'],
                 'cna': row['cna_count'],
                 'other': row['other_count']
-            }, 'shift': {
-                'day': row['day_count'],
-                'night': row['night_count'],
-                'mid': row['mid_count']
             }, 'facility_type': {
                 'hospital': row['hospital_count'],
                 'extended_care': row['extended_count'],
                 'long_term_care': row['long_count']
             }
         }
-
-    # for item in whistles:
-    #    whistle_objs.append(item.as_simple_dict())
 
     return Response(json.dumps(whistle_objs), mimetype='application/json')
