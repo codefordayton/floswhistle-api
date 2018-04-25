@@ -68,7 +68,7 @@ def is_unique(hash, start_date):
 
     existing = Whistle.query.filter(
         Whistle.hash == hash,
-        Whistle.created_date > time_window).all()
+        Whistle.start_date > started_date).all()
 
     # return existing is None
     return len(existing) == 0
