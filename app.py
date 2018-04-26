@@ -47,7 +47,8 @@ def is_valid(data):
     start_date = data.get('start_date')
     if start_date:
         time_window = datetime.utcnow() - timedelta(days=2)
-        started_date = parser.parse(start_date)
+        # started_date = parser.parse(start_date)
+        started_date = datetime.fromtimestamp(start_date)
         if started_date < time_window:
             valid = False
 

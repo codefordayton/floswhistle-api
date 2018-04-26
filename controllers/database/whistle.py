@@ -2,8 +2,8 @@ from extensions import db
 from sqlalchemy.sql import func
 
 import uuid
-import datetime
 from dateutil import parser
+from datetime import datetime, timedelta
 import enum
 
 class FacilityType(enum.Enum):
@@ -37,19 +37,21 @@ class Whistle(db.Model):
                  reporter_type=ReporterType.lpn, **kwargs):
         self.id = str(uuid.uuid4())
         if start_date is None:
-            self.start_date = datetime.datetime.now()
+            self.start_date = datetime.now()
         else:
-            self.start_date = parser.parse(start_date)
+            # self.start_date = parser.parse(start_date)
+            self.start_date = datetime.fromtimestamp(start_date)
         if end_date is None:
-            self.end_date = datetime.datetime.now()
+            self.end_date = datetime.now()
         else:
-            self.end_date = parser.parse(end_date)
+            # self.end_date = parser.parse(end_date)
+            self.end_date = datetime.fromtimestamp(end_date)
         self.hash = hash
         self.facility_type = facility_type
         self.district_state = district_state
         self.district = district
         self.reporter_type = reporter_type
-        self.created_date = datetime.datetime.utcnow()
+        self.created_date = datetime.utcnow()
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
