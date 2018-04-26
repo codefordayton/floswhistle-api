@@ -60,18 +60,19 @@ def generate_hash(request):
     return hashlib.md5(input.encode()).hexdigest()
 
 def is_unique(hash, start_date):
-    time_window = datetime.utcnow() - timedelta(hours=12)
-    if start_date:
-        started_date = parser.parse(start_date).date()
-    else:
-        started_date = datetime.utcnow().date()  
+    # time_window = datetime.utcnow() - timedelta(hours=12)
+    # if start_date:
+    #     started_date = parser.parse(start_date).date()
+    # else:
+    #     started_date = datetime.utcnow().date()  
 
-    existing = Whistle.query.filter(
-        Whistle.hash == hash,
-        Whistle.start_date > started_date).all()
+    # existing = Whistle.query.filter(
+    #     Whistle.hash == hash,
+    #     Whistle.start_date > started_date).all()
 
     # return existing is None
-    return len(existing) == 0
+    # return len(existing) == 0
+    return True
 
 def get_zip_district(zip):
     zips = Zip.query.filter(Zip.zip == zip).all()
