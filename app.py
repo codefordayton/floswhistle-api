@@ -56,24 +56,26 @@ def is_valid(data):
 
 def generate_hash(request):
     user_string = request.headers.get('User-Agent', 'unknown')
-    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    ip = request.headers.get('X-Forwarded-For')
+    if ip is None:
+        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     input = ip + ' ' + user_string
     return hashlib.md5(input.encode()).hexdigest()
 
 def is_unique(hash, start_date):
-    # time_window = datetime.utcnow() - timedelta(hours=12)
-    # if start_date:
-    #     started_date = parser.parse(start_date).date()
-    # else:
-    #     started_date = datetime.utcnow().date()  
+    time_window = datetime.utcnow() - timedelta(hours=12)
+    if start_date:
+        started_date = parser.parse(start_date).date()
+    else:
+        started_date = datetime.utcnow().date()  
 
-    # existing = Whistle.query.filter(
-    #     Whistle.hash == hash,
-    #     Whistle.start_date > started_date).all()
+    existing = Whistle.query.filter(
+        Whistle.hash == hash,
+        Whistle.start_date > started_date).all()
 
     # return existing is None
-    # return len(existing) == 0
-    return True
+    return len(existing) == 0
+    # return True
 
 def get_zip_district(zip):
     zips = Zip.query.filter(Zip.zip == zip).all()
