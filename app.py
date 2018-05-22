@@ -1,6 +1,5 @@
 import hashlib
 from datetime import datetime, timedelta
-from dateutil import parser
 import random
 import requests
 from enum import Enum
@@ -47,7 +46,6 @@ def is_valid(data):
     start_date = data.get('start_date')
     if start_date:
         time_window = datetime.utcnow() - timedelta(days=2)
-        # started_date = parser.parse(start_date)
         started_date = datetime.fromtimestamp(start_date)
         if started_date < time_window:
             valid = False
@@ -63,15 +61,15 @@ def generate_hash(request):
     return hashlib.md5(input.encode()).hexdigest()
 
 def is_unique(hash, start_date):
-    time_window = datetime.utcnow() - timedelta(hours=12)
+    time_window = timedelta(hours=12)
     if start_date:
-        started_date = parser.parse(start_date).date()
+        started_date = datetime.utcfromtimestamp(start_date)
     else:
         started_date = datetime.utcnow().date()  
 
     existing = Whistle.query.filter(
         Whistle.hash == hash,
-        Whistle.start_date > started_date).all()
+        Whistle.start_date > started_date - time_window).all()
 
     # return existing is None
     return len(existing) == 0
@@ -79,6 +77,8 @@ def is_unique(hash, start_date):
 
 def get_zip_district(zip):
     zips = Zip.query.filter(Zip.zip == zip).all()
+    if zips is None or len(zips) == 0:
+        return None
     weights = [z.factor for z in zips]
     return random.choices(zips, weights=weights)
 
@@ -97,7 +97,12 @@ def create_whistle():
         return Response(json.dumps({'error': 'Too many requests'}),
                         mimetype='application/json', status=400)
 
-    zip_district = get_zip_district(request.json['zip'])[0]
+    zip_district = get_zip_district(request.json['zip'])
+    if zip_district is None:
+        return Response(json.dumps({'error': 'Invalid request'}),
+                        mimetype='application/json', status=400)
+
+    zip_district = zip_district[0]
     # add whistle
     whistle = Whistle(hash=user_hash, district=zip_district.district,
                       district_state=zip_district.state, **request.json)
