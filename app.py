@@ -147,7 +147,7 @@ def get_data():
         group by district_state, district;
     """)
     # whistle_objs = { 'start_date': '4/1/2018', 'end_date': '4/2/2018', 'states': {} }
-    whistle_objs = { 'states': {} }
+    whistle_objs = { 'min_count': 0, 'max_count': 0, 'total': 0, 'states': {} }
     for row in rows:
         if row['district_state'] not in whistle_objs['states']:
             whistle_objs['states'][row['district_state']] = {}
@@ -163,5 +163,8 @@ def get_data():
                 'long_term_care': row['long_count']
             }
         }
+    whistle_objs['total'] = db.engine.execute('select count(*) from whistles;').scalar()
+    whistle_objs['max_count'] = db.engine.execute('select count(*) from whistles group by district_state, district order by count(*) desc limit 1;').scalar()
+    whistle_objs['min_count'] = db.engine.execute('select count(*) from whistles group by district_state, district order by count(*) limit 1;').scalar()
 
     return Response(json.dumps(whistle_objs), mimetype='application/json')
