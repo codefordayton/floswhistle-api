@@ -3,7 +3,7 @@ import os
 class Config(object):
 
     SERVER_HOST = 'localhost'
-    SERVER_PORT = 6000
+    SERVER_PORT = 6001
     SECRET_KEY = 'secret key'
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///data/test1.db'
     SQLALCHEMY_DATABASE_URI = 'postgres://postgres@localhost/whistles'
