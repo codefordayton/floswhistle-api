@@ -7,6 +7,7 @@ from flask import Flask, Blueprint, request, Response, json
 from extensions import cors, db, migrate
 from controllers.database.whistle import Whistle
 from controllers.database.zip import Zip
+from controllers.database.pandemic_whistle import PandemicWhistle
 
 try:
     from config import ProdConfig
@@ -75,6 +76,20 @@ def is_unique(hash, start_date):
     return len(existing) == 0
     # return True
 
+def is_report_unique(hash, reported_date):
+    time_window = timedelta(hours=12)
+    if reported_date:
+        reported_date = datetime.utcfromtimestamp(reported_date)
+    else:
+        reported_date = datetime.utcnow().date()  
+
+    existing = PandemicWhistle.query.filter(
+        PandemicWhistle.hash == hash,
+        PandemicWhistle.reported_date > reported_date - time_window).all()
+
+    # return existing is None
+    return len(existing) == 0
+
 def get_zip_district(zip):
     zips = Zip.query.filter(Zip.zip == zip).all()
     if zips is None or len(zips) == 0:
@@ -111,6 +126,37 @@ def create_whistle():
 
     return Response(json.dumps(whistle.as_dict(), cls=EnumEncoder),
                     mimetype='application/json')
+
+@api_blueprint.route('/report', methods=['POST'])
+def create_report():
+    user_hash = generate_hash(request)
+    if not is_report_unique(user_hash, request.json.get('reported_date')):
+        print("NOT UNIQUE")
+        return Response(json.dumps({'error': 'Too many requests'}),
+                        mimetype='application/json', status=400)
+
+    zip_district = get_zip_district(request.json['zip'])
+    if zip_district is None:
+        print("NO DISTRICT")
+        return Response(json.dumps({'error': 'Invalid request'}),
+                        mimetype='application/json', status=400)
+
+    zip_district = zip_district[0]
+
+    report = PandemicWhistle(hash=user_hash, district=zip_district.district,
+                             district_state=zip_district.state, **request.json)
+    db.session.add(report)
+    db.session.commit()
+
+    return Response(json.dumps(report.as_dict(), cls=EnumEncoder),
+                    mimetype='application/json')
+
+
+@api_blueprint.route('reports', methods=['GET'])
+def get_reports():
+    return Response(json.dumps({}, cls=EnumEncoder),
+                    mimetype='application/json')
+    
 
 @api_blueprint.route('/data', methods=['GET'])
 def get_data():
