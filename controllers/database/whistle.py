@@ -10,12 +10,22 @@ class FacilityType(enum.Enum):
     hospital = 'hospital'
     extended_care = 'extended_care'
     long_term_care = 'long_term_care'
+    pre_hospital = 'pre_hospital'
+    nursing_home = 'nursing_home'
+    er = 'er'
+    urgent_care = 'urgent_care'
 
 class ReporterType(enum.Enum):
     lpn = 'lpn'
     rn = 'rn'
     cna = 'cna'
     other = 'other'
+    emt = 'emt'
+    paramedic = 'paramedic'
+    apn = 'apn'
+    rt = 'rt'
+    physician = 'physician'
+    pa = 'pa'
 
 class Whistle(db.Model):
     __tablename__ = 'whistles'
