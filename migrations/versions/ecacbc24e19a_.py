@@ -30,58 +30,58 @@ tmp_reporter_type = sa.Enum(*new_reporter, name='_reportertype')
 def upgrade():
     tmp_facility_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN facility_type TYPE _facilitytype'
-               ' USING type::text::_facilitytype')
+               ' USING facility_type::text::_facilitytype')
     op.execute('ALTER TABLE whistles ALTER COLUMN facility_type TYPE _facilitytype'
-               ' USING type::text::_facilitytype')
+               ' USING facility_type::text::_facilitytype')
     old_facility_type.drop(op.get_bind(), checkfirst=False)
     # Create and convert to the "new" type type
     new_facility_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN facility_type TYPE facilitytype'
-               ' USING type::text::facilitytype')
+               ' USING facility_type::text::facilitytype')
     op.execute('ALTER TABLE whistles ALTER COLUMN facility_type TYPE facilitytype'
-               ' USING type::text::facilitytype')
+               ' USING facility_type::text::facilitytype')
     tmp_facility_type.drop(op.get_bind(), checkfirst=False)
 
     tmp_reporter_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN reporter_type TYPE _reportertype'
-               ' USING type::text::_reportertype')
+               ' USING reporter_type::text::_reportertype')
     op.execute('ALTER TABLE whistles ALTER COLUMN reporter_type TYPE _reportertype'
-               ' USING type::text::_reportertype')
+               ' USING reporter_type::text::_reportertype')
     old_reporter_type.drop(op.get_bind(), checkfirst=False)
     # Create and convert to the "new" type type
     new_reporter_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN reporter_type TYPE reportertype'
-               ' USING type::text::reportertype')
+               ' USING reporter_type::text::reportertype')
     op.execute('ALTER TABLE whistles ALTER COLUMN reporter_type TYPE reportertype'
-               ' USING type::text::reportertype')
+               ' USING reporter_type::text::reportertype')
     tmp_reporter_type.drop(op.get_bind(), checkfirst=False)
 
 
 def downgrade():
     tmp_facility_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN facility_type TYPE _facilitytype'
-               ' USING type::text::_facilitytype')
+               ' USING facility_type::text::_facilitytype')
     op.execute('ALTER TABLE whistles ALTER COLUMN facility_type TYPE _facilitytype'
-               ' USING type::text::_facilitytype')
+               ' USING facility_type::text::_facilitytype')
     new_facility_type.drop(op.get_bind(), checkfirst=False)
     # Create and convert to the "old" type type
     old_facility_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN facility_type TYPE facilitytype'
-               ' USING type::text::facilitytype')
+               ' USING facility_type::text::facilitytype')
     op.execute('ALTER TABLE whistles ALTER COLUMN facility_type TYPE facilitytype'
-               ' USING type::text::facilitytype')
+               ' USING facility_type::text::facilitytype')
     tmp_facility_type.drop(op.get_bind(), checkfirst=False)
 
     tmp_reporter_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN reporter_type TYPE _reportertype'
-               ' USING type::text::_reportertype')
+               ' USING reporter_type::text::_reportertype')
     op.execute('ALTER TABLE whistles ALTER COLUMN reporter_type TYPE _reportertype'
-               ' USING type::text::_reportertype')
+               ' USING reporter_type::text::_reportertype')
     new_reporter_type.drop(op.get_bind(), checkfirst=False)
     # Create and convert to the "old" type type
     old_reporter_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE pandemic_whistles ALTER COLUMN reporter_type TYPE reportertype'
-               ' USING type::text::reportertype')
+               ' USING reporter_type::text::reportertype')
     op.execute('ALTER TABLE whistles ALTER COLUMN reporter_type TYPE reportertype'
-               ' USING type::text::reportertype')
+               ' USING reporter_type::text::reportertype')
     tmp_reporter_type.drop(op.get_bind(), checkfirst=False)
