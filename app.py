@@ -152,9 +152,40 @@ def create_report():
                     mimetype='application/json')
 
 
-@api_blueprint.route('reports', methods=['GET'])
+@api_blueprint.route('/reports', methods=['GET'])
 def get_reports():
-    return Response(json.dumps({}, cls=EnumEncoder),
+    args = request.args
+
+    start_date = None
+    end_date = None
+
+    if 'start_date' in args:
+        start_date = args.get('start_date')
+        try:
+            start_date = datetime.fromtimestamp(float(start_date))
+        except ValueError:
+            return Response(json.dumps({'message': 'Invalid start_date'}, cls=EnumEncoder),
+                mimetype='application/json'), 400
+    if 'end_date' in args:
+        end_date = args.get('end_date')
+        try:
+            end_date = datetime.fromtimestamp(float(end_date))
+        except ValueError:
+            return Response(json.dumps({'message': 'Invalid end_date'}, cls=EnumEncoder),
+                mimetype='application/json'), 400
+
+    q = PandemicWhistle.query
+
+    if start_date:
+        q = q.filter(PandemicWhistle.reported_date >= start_date)
+    if end_date:
+        q = q.filter(PandemicWhistle.reported_date < end_date)
+    results = q.all()
+    result_dicts = []
+    for result in results:
+        result_dicts.append(result.as_dict())
+
+    return Response(json.dumps(result_dicts, cls=EnumEncoder),
                     mimetype='application/json')
     
 
