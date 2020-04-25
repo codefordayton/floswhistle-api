@@ -1,4 +1,5 @@
 #!env/bin/python
+import subprocess 
 
 from flask_script import Manager, Command, Option
 from flask_migrate import MigrateCommand
@@ -35,9 +36,14 @@ class ZipLoaderCommand(Command):
     def run(self):
         scripts.load_zips.load()
 
+class TestCommand(Command):
+    def run(self):
+        subprocess.run(["python", "-m", "unittest", "discover", "-s", "tests"])
+
 manager.add_command('db', MigrateCommand)
 manager.add_command('serve', ServerCommand())
 manager.add_command('zips', ZipLoaderCommand())
 manager.add_command('demo', DemoDataCommand())
+manager.add_command('test', TestCommand())
 
 manager.run()
