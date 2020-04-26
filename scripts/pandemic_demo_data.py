@@ -57,7 +57,9 @@ def get_hash():
 
 def get_reported_date():
     days_removed = random.randint(0, 60)
-    return datetime.today() - timedelta(days=days_removed)
+    today = datetime.today()
+    just_today = datetime(today.year, today.month, today.day)
+    return int((just_today - timedelta(days=days_removed)).timestamp())
 
 def get_willing():
     return random.randint(0, 2)
@@ -66,7 +68,7 @@ def get_shortages():
     shortages = {}
 
     # get number we should try to get
-    shortage_count = random.randint(0,4)
+    shortage_count = random.randint(0,5)
     options = [
         'surgical_masks', 'n95_masks', 'papr_hoods',
         'non_sterile_gloves', 'isolation_gowns', 'face_shields',
@@ -100,6 +102,11 @@ def get_testing():
     return testing
 
 def load():
+    db.session.query(PandemicWhistle).filter(
+        PandemicWhistle.hash.like('demo%')
+    ).delete(synchronize_session=False)
+    db.session.commit()
+
     for x in range(500):
         state = get_state()
         data = {
@@ -113,6 +120,6 @@ def load():
         }
         data.update(get_shortages())
         data.update(get_testing())
-        report = PandemicWhistle(data)
+        report = PandemicWhistle(**data)
         db.session.add(report)
         db.session.commit()

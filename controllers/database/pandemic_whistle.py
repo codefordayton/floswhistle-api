@@ -63,14 +63,14 @@ class PandemicWhistle(db.Model):
         if reported_date is None:
             self.reported_date = datetime.now()
         else:
-            self.reported_date = datetime.fromtimestamp(reported_date)
+            self.reported_date = datetime.fromtimestamp(int(float(reported_date)))
         self.hash = hash
         self.facility_type = facility_type
         self.district_state = district_state
         self.district = district
         self.reporter_type = reporter_type
 
-        self.surgical_masks = surgical_masks=False
+        self.surgical_masks = surgical_masks
         self.n95_masks = n95_masks
         self.papr_hoods = papr_hoods
         self.non_sterile_gloves = non_sterile_gloves
