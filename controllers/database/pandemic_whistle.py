@@ -101,4 +101,5 @@ class PandemicWhistle(db.Model):
         data.pop('id', None)
         data.pop('hash', None)
         data.pop('created_date', None)
+        data.pop('comment', None)
         return data

@@ -183,7 +183,7 @@ def get_reports():
     results = q.all()
     result_dicts = []
     for result in results:
-        result_dicts.append(result.as_dict())
+        result_dicts.append(result.as_simple_dict())
 
     return Response(json.dumps(result_dicts, cls=EnumEncoder),
                     mimetype='application/json')
