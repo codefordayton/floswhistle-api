@@ -97,9 +97,47 @@ class PandemicWhistle(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def as_simple_dict(self):
-        data = self.as_dict();
-        data.pop('id', None)
-        data.pop('hash', None)
-        data.pop('created_date', None)
-        data.pop('comment', None)
-        return data
+        return {
+            'reported_date': self.reported_date,
+            'allIds': ['facility', 'reporter', 'shortages', 'test_data'],
+            'facility': {
+                'district': self.district,
+                'district_state': self.district_state,
+                'facility_type': self.facility_type
+            },
+            'reporter': {
+                'reporter_type': self.reporter_type,
+                'willing_to_report': self.willing_to_report
+            },
+            'shortages': {
+                'icu_beds': self.icu_beds,
+                'face_shields': self.face_shields,
+                'icu_trained_nurses': self.icu_trained_nurses,
+                'isolation_gowns': self.isolation_gowns,
+                'n95_masks': self.n95_masks,
+                'narcotic_analgesics': self.narcotic_analgesics,
+                'non_sterile_gloves': self.non_sterile_gloves,
+                'oxygen': self.oxygen,
+                'papr_hoods': self.papr_hoods,
+                'paralytics': self.paralytics,
+                'sedatives': self.sedatives,
+                'surgical_masks': self.surgical_masks,
+                'ventilators': self.ventilators
+            },
+            'test_data': {
+                'test_none': self.test_none,
+                'test_tried': self.test_tried,
+                'test_no_result': self.test_no_result,
+                'test_results': {
+                    'test_anti_neg': self.test_anti_neg,
+                    'test_anti_pos': self.test_anti_pos,
+                    'test_swab_neg': self.test_swab_neg,
+                    'test_swab_pos': self.test_swab_pos
+                }
+            }
+        }
+        # data = self.as_dict();
+        # data.pop('id', None)
+        # data.pop('hash', None)
+        # data.pop('created_date', None)
+        # return data
