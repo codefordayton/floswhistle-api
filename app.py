@@ -1,9 +1,11 @@
 import hashlib
+import io
+import csv
 from datetime import datetime, timedelta
 import random
 import requests
 from enum import Enum
-from flask import Flask, Blueprint, request, Response, json
+from flask import Flask, Blueprint, request, Response, json, make_response
 from extensions import cors, db, migrate
 from controllers.database.whistle import Whistle
 from controllers.database.zip import Zip
@@ -188,6 +190,47 @@ def get_reports():
     return Response(json.dumps(result_dicts, cls=EnumEncoder),
                     mimetype='application/json')
     
+@api_blueprint.route('/csv', methods=['GET'])
+def get_csv():
+    recs = PandemicWhistle.query.order_by(PandemicWhistle.reported_date).all()
+    field_names = [
+        'reported_date',
+        'facility_type',
+        'district_state',
+        'district',
+        'reporter_type',
+        'surgical_masks',
+        'n95_masks',
+        'papr_hoods',
+        'non_sterile_gloves',
+        'isolation_gowns',
+        'face_shields',
+        'oxygen',
+        'sedatives',
+        'narcotic_analgesics',
+        'paralytics',
+        'icu_beds',
+        'icu_trained_nurses',
+        'ventilators',
+        'test_none',
+        'test_tried',
+        'test_no_result',
+        'test_swab_neg',
+        'test_swab_pos',
+        'test_anti_neg',
+        'test_anti_pos',
+        'willing_to_report'
+    ] 
+
+    si = io.StringIO()
+    writer = csv.DictWriter(si, fieldnames=field_names, extrasaction='ignore')
+    writer.writeheader()
+    for row in recs:
+        writer.writerow(row.as_csv_dict())
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 @api_blueprint.route('/data', methods=['GET'])
 def get_data():

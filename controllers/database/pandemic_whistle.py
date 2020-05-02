@@ -42,7 +42,7 @@ class PandemicWhistle(db.Model):
 
     created_date = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, hash=None, report_date=None,
+    def __init__(self, hash=None,
                  facility_type=FacilityType.hospital,
                  district_state=None, district=None,
                  reported_date=None, reporter_type=ReporterType.lpn,
@@ -96,6 +96,12 @@ class PandemicWhistle(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+    def as_csv_dict(self):
+        data = self.as_dict();
+        data['facility_type'] = self.facility_type.value
+        data['reporter_type'] = self.reporter_type.value
+        return data
+       
     def as_simple_dict(self):
         return {
             'reported_date': self.reported_date,
