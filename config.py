@@ -16,13 +16,13 @@ class ProdConfig(Config):
     ENV = 'prod'
     DEBUG = True
 
-    CORS_ORIGINS = [
-        'https://floswhistle.com',
-        'https://floswhistle.org',
-        'https://www.floswhistle.com',
-        'https://www.floswhistle.org',
-        'https://beta.floswhistle.org'
-    ]
+    # CORS_ORIGINS = [
+    #     'https://floswhistle.com',
+    #     'https://floswhistle.org',
+    #     'https://www.floswhistle.com',
+    #     'https://www.floswhistle.org',
+    #     'https://beta.floswhistle.org'
+    # ]
 
     if 'RDS_HOSTNAME' in os.environ:
         SQLALCHEMY_DATABASE_URI = f"postgres://{os.environ['RDS_USERNAME']}:{os.environ['RDS_PASSWORD']}@{os.environ['RDS_HOSTNAME']}/{os.environ['RDS_DB_NAME']}"
