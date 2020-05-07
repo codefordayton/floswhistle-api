@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import random
 import requests
 from enum import Enum
-from flask import Flask, Blueprint, request, Response, json, make_response
+from flask import Flask, Blueprint, request, Response, json, make_response 
 from extensions import cors, db, migrate
 from controllers.database.whistle import Whistle
 from controllers.database.zip import Zip
@@ -33,6 +33,7 @@ def create_app(config_object=ProdConfig):
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+
     return app
 
 def is_valid(data):
@@ -61,6 +62,9 @@ def generate_hash(request):
     if ip is None:
         ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     input = ip + ' ' + user_string
+    return hashlib.md5(input.encode()).hexdigest()
+
+def generate_key(input):
     return hashlib.md5(input.encode()).hexdigest()
 
 def is_unique(hash, start_date):
@@ -129,11 +133,21 @@ def create_whistle():
     return Response(json.dumps(whistle.as_dict(), cls=EnumEncoder),
                     mimetype='application/json')
 
+@api_blueprint.route('/key', methods=['GET'])
+def get_key():
+    return Response(
+        json.dumps({'key': generate_key(generate_hash(request))}),
+        mimetype='application/json', status=400)
+    
 @api_blueprint.route('/report', methods=['POST'])
 def create_report():
     user_hash = generate_hash(request)
+    # sent_hash = request.json.get('auth')
+    # if generate_key(user_hash) != sent_hash:
+    #     return Response(json.dumps({'error': 'Invalid request'}),
+    #                     mimetype='application/json', status=400)
+
     if not is_report_unique(user_hash, request.json.get('reported_date')):
-        print("NOT UNIQUE")
         return Response(json.dumps({'error': 'Too many requests'}),
                         mimetype='application/json', status=400)
 
