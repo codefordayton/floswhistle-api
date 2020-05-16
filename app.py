@@ -153,7 +153,7 @@ def create_report():
 
     zip_district = get_zip_district(request.json['zip'])
     if zip_district is None:
-        print("NO DISTRICT")
+        print("NO DISTRICT", request.json['zip'])
         return Response(json.dumps({'error': 'Invalid request'}),
                         mimetype='application/json', status=400)
 
